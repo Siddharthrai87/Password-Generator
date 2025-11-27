@@ -10,12 +10,12 @@ const numbersCheck = document.querySelector("#numbers");
 const symbolsCheck = document.querySelector("#symbols");
 const indicator = document.querySelector("[data-indicator]");
 const generateBtn = document.querySelector(".generateButton");
-const allCheckBox = document.querySelectorAll("input[type=checkbox");
+const allCheckBox = document.querySelectorAll("input[type=checkbox]");
 const symbol='~!@#$%^&*()_+{}|:"<>?[]';
 
 let password="";
 let passwordLength=10;
-let checkCount=1;
+let checkCount=0;
 handleSlider();
 
 function handleSlider(){
@@ -28,7 +28,7 @@ function setIndicator(color){
 }
 
 function getRndInteger(min,max){
-    return Math.floor(Math.random()*(min-max))+min;
+    return Math.floor(Math.random()*(max-min))+min;
 }
 
 function generateRandomNumber(){
@@ -80,6 +80,27 @@ async function copyContent() {
     },2000);
 }
 
+function handleCheckBoxChange(){
+    checkCount=0;
+    allCheckBox.forEach((checkbox)=>{
+        if(checkbox.checked)
+        {
+            checkCount++;
+        }
+    });
+    if(checkCount>passwordLength)
+    {
+        passwordLength=checkCount;
+        handleSlider();
+    }
+}
+
+allCheckBox.forEach((checkbox)=>{
+    checkbox.addEventListener('change',handleCheckBoxChange)
+})
+
+
+
 inputSlider.addEventListener('input',(e)=>{
     passwordLength=e.target.value;
     handleSlider();
@@ -92,3 +113,47 @@ copyBtn.addEventListener('click',()=>{
     }
 })
 
+generateBtn.addEventListener('click',()=>{
+    if(checkCount<=0)return;
+
+    if(checkCount>passwordLength)
+    {
+        passwordLength=checkCount;
+        handleSlider();
+    }
+
+    password="";
+    let funcArr=[];
+    if(uppercaseCheck.checked)
+    {
+        funcArr.push(generateUppercase);
+    }
+    if(LowercaseCheck.checked)
+    {
+        funcArr.push(generateLowercase);
+    }
+    if(symbolsCheck.checked)
+    {
+        funcArr.push(generateSymbol);
+    }
+    if(numbersCheck.checked)
+    {
+        funcArr.push(generateRandomNumber);
+    }
+
+    for(let i=0;i<funcArr.length;i++)
+    {
+        password+=funcArr[i]();
+    }
+
+    for(let i=0;i<passwordLength-funcArr.length;i++)
+    {
+        let randIndx=getRndInteger(0,funcArr.length);
+        password+=funcArr[randIndx]();
+    }
+
+    // password=shufflePassword();
+
+    passwordDisplay.value=password;
+    calcStrength();
+})
